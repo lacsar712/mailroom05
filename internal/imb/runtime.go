@@ -84,8 +84,13 @@ func DumpTrayList(path, body string) error {
 	}
 	defer f.Close()
 	w := bufio.NewWriter(f)
-	_, err = w.WriteString(body)
-	return err
+	if _, err := w.WriteString(body); err != nil {
+		return err
+	}
+	if err := w.Flush(); err != nil {
+		return err
+	}
+	return nil
 }
 
 func GrowRouting(dst []byte, extra byte) []byte {
