@@ -82,9 +82,17 @@ func DumpTrayList(path, body string) error {
 	if err != nil {
 		return err
 	}
-	defer f.Close()
 	w := bufio.NewWriter(f)
 	_, err = w.WriteString(body)
+	if err == nil {
+		// Flush the buffered writes before close, otherwise short bodies
+		// that never filled the buffer are discarded and the tray list file
+		// lands empty even though the call returned success.
+		err = w.Flush()
+	}
+	if cerr := f.Close(); err == nil {
+		err = cerr
+	}
 	return err
 }
 
